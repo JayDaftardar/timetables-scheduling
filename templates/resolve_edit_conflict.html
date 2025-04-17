@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resolve Edit Scheduling Conflict</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h2>Edit Scheduling Conflict</h2>
+        
+        <div class="alert alert-danger">
+            <p><strong>There is a conflict with your edited schedule:</strong></p>
+            <p>Course: {{ course_name }} for {{ division.name }}</p>
+            <p>Room: {{ room.name }}</p>
+            <p>Requested Time: {{ requested_slot.day }} {{ requested_slot.start_time.strftime('%H:%M') }} - {{ requested_slot.end_time.strftime('%H:%M') }}</p>
+            
+            {% if conflict_details and conflict_details.course_name %}
+                <p><strong>Conflict with:</strong> {{ conflict_details.course_name }} (Prof. {{ conflict_details.faculty_name }})</p>
+                {% if conflict_details.faculty_conflict %}
+                    <p>You already have a class scheduled at this time.</p>
+                {% elif conflict_details.room_conflict %}
+                    <p>This room is already booked for this time slot.</p>
+                {% endif %}
+            {% endif %}
+        </div>
+        
+        <h3>Please select an alternative time slot:</h3>
+        
+        {% if available_slots %}
+            <div class="timetable-container">
+                <table class="timetable">
+                    <thead>
+                        <tr>
+                            <th>Day</th>
+                            <th>Time</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for slot in available_slots %}
+                        <tr>
+                            <td>{{ slot.day }}</td>
+                            <td>{{ slot.start_time.strftime('%H:%M') }} - {{ slot.end_time.strftime('%H:%M') }}</td>
+                            <td>
+                                <form action="{{ url_for('resolve_edit_conflict') }}" method="post">
+                                    <input type="hidden" name="course_id" value="{{ course.id }}">
+                                    <input type="hidden" name="course_name" value="{{ course_name }}">
+                                    <input type="hidden" name="division_id" value="{{ division_id }}">
+                                    <input type="hidden" name="room_id" value="{{ room_id }}">
+                                    <input type="hidden" name="time_slot_id" value="{{ slot.id }}">
+                                    <button type="submit" class="btn btn-primary">Select</button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="alert alert-info">
+                No available time slots found. Please try a different room.
+            </div>
+        {% endif %}
+        
+        <div class="dashboard-actions">
+            <a href="{{ url_for('edit_schedule', course_id=course.id) }}" class="btn btn-secondary">Back to Edit Form</a>
+            <a href="{{ url_for('faculty_dashboard') }}" class="btn btn-secondary">Return to Dashboard</a>
+        </div>
+    </div>
+</body>
+</html>

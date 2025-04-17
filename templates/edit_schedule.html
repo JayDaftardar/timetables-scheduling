@@ -1,0 +1,81 @@
+<!-- templates/edit_schedule.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Schedule - Timetable Scheduling System</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <header class="dashboard-header">
+            <h1>Edit Schedule</h1>
+            <div class="navigation">
+                <a href="{{ url_for('faculty_dashboard') }}" class="btn btn-secondary">Back to Dashboard</a>
+                <a href="{{ url_for('logout') }}" class="btn btn-danger">Logout</a>
+            </div>
+        </header>
+        
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+        
+        <div class="form-container">
+            <form action="{{ url_for('edit_schedule', course_id=course.id) }}" method="post">
+                <div class="form-group">
+                    <label for="course_name">Course Name:</label>
+                    <input type="text" id="course_name" name="course_name" value="{{ course.name }}" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="division_id">Division:</label>
+                    <select id="division_id" name="division_id" required>
+                        {% for division in divisions %}
+                            <option value="{{ division.id }}" {% if division.id == course.division_id %}selected{% endif %}>{{ division.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="room_id">Room/Lab:</label>
+                    <select id="room_id" name="room_id" required>
+                        <optgroup label="Classrooms">
+                            {% for room in rooms if not room.is_lab %}
+                                <option value="{{ room.id }}" {% if room.id == course.room_id %}selected{% endif %}>{{ room.name }} (Capacity: {{ room.capacity }})</option>
+                            {% endfor %}
+                        </optgroup>
+                        <optgroup label="Labs">
+                            {% for room in rooms if room.is_lab %}
+                                <option value="{{ room.id }}" {% if room.id == course.room_id %}selected{% endif %}>{{ room.name }} (Capacity: {{ room.capacity }})</option>
+                            {% endfor %}
+                        </optgroup>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="time_slot_id">Time Slot:</label>
+                    <select id="time_slot_id" name="time_slot_id" required>
+                        {% set days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'] %}
+                        {% for day in days %}
+                            <optgroup label="{{ day }}">
+                                {% for slot in time_slots if slot.day == day %}
+                                    <option value="{{ slot.id }}" {% if slot.id == course.time_slot_id %}selected{% endif %}>{{ slot.start_time.strftime('%H:%M') }} - {{ slot.end_time.strftime('%H:%M') }}</option>
+                                {% endfor %}
+                            </optgroup>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <button type="submit" class="btn btn-primary">Update Schedule</button>
+            </form>
+        </div>
+    </div>
+    
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>

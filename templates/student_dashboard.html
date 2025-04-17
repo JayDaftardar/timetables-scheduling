@@ -1,0 +1,81 @@
+<!-- templates/student_dashboard.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Timetable - Timetable Scheduling System</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <header class="dashboard-header">
+            <h1>Student Timetable - {{ division.name }}</h1>
+            <div class="navigation">
+                <a href="{{ url_for('index') }}" class="btn btn-secondary">Back to Home</a>
+            </div>
+        </header>
+        
+        <div class="division-selector">
+            <span>Change Division:</span>
+            {% for div in divisions %}
+                <a href="{{ url_for('student_timetable', division_id=div.id) }}" class="btn {% if div.id == division.id %}btn-primary{% else %}btn-secondary{% endif %}">{{ div.name }}</a>
+            {% endfor %}
+        </div>
+        
+        <div class="timetable-section">
+            <h2>Class Timetable</h2>
+            <div class="timetable-container">
+                <table class="timetable">
+                    <thead>
+                        <tr>
+                            <th>Time</th>
+                            <th>Monday</th>
+                            <th>Tuesday</th>
+                            <th>Wednesday</th>
+                            <th>Thursday</th>
+                            <th>Friday</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% set time_slots = [] %}
+                        {% for day, slots in timetable.items() %}
+                        {% for time_key in slots.keys() %}
+                            {% if time_key not in time_slots %}
+                                {% set _ = time_slots.append(time_key) %}
+                            {% endif %}
+                        {% endfor %}
+                        {% endfor %}
+                        
+                        {% for time_key in time_slots %}
+                            <tr>
+                                <td class="time-slot">{{ time_key }}</td>
+                                {% for day in ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'] %}
+                                    {% if day in timetable and time_key in timetable[day] %}
+                                        {% set course = timetable[day][time_key] %}
+                                        {% if course %}
+                                            <td class="course-slot occupied student-view">
+                                                <div class="course-details">
+                                                    <strong>{{ course.name }}</strong>
+                                                    <div>Room: {{ course.room }}</div>
+                                                    <div>Faculty: {{ course.faculty }}</div>
+                                                </div>
+                                            </td>
+                                        {% else %}
+                                            <td class="course-slot empty"></td>
+                                        {% endif %}
+                                    {% else %}
+                                        <td class="course-slot empty"></td>
+                                    {% endif %}
+                                {% endfor %}
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>

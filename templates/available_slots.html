@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Available Time Slots</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h2>Available Time Slots</h2>
+        
+        {% if available_slots %}
+            <div class="timetable-container">
+                <table class="timetable">
+                    <thead>
+                        <tr>
+                            <th>Day</th>
+                            <th>Time</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for slot in available_slots %}
+                        <tr>
+                            <td>{{ slot.day }}</td>
+                            <td>{{ slot.start_time.strftime('%H:%M') }} - {{ slot.end_time.strftime('%H:%M') }}</td>
+                            <td>
+                                <form action="{{ url_for('resolve_conflict') }}" method="post">
+                                    <input type="hidden" name="course_name" value="{{ course_name }}">
+                                    <input type="hidden" name="division_id" value="{{ division_id }}">
+                                    <input type="hidden" name="room_id" value="{{ room_id }}">
+                                    <input type="hidden" name="time_slot_id" value="{{ slot.id }}">
+                                    <button type="submit" class="btn btn-primary">Select</button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="alert alert-info">
+                No available time slots found. Please try a different room.
+            </div>
+            <a href="{{ url_for('add_schedule') }}" class="btn btn-secondary">Back</a>
+        {% endif %}
+    </div>
+</body>
+</html>
